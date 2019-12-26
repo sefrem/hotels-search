@@ -2,22 +2,46 @@ import React from 'react'
 
 class App extends React.Component {
   state = {
-    city: "",
-    startDate: "",
-    endDate: "",
-    token: "6d5dccc795985c3f6b9bbe9c70c428dd"
+    city: 'Moscow',
+    startDate: '2020-01-10',
+    endDate: '2020-01-15',
+    token: '6d5dccc795985c3f6b9bbe9c70c428dd',
+    hotels: []
   }
 
   onChange = e => {
-    const name = e.target.name;
-    const value = e.target.value;
+    const name = e.target.name
+    const value = e.target.value
     this.setState({
-      [name]: value
+      [name]: value,
     })
   }
 
-  onSumbit = () => {
-    // https://support.travelpayouts.com/hc/ru/articles/115000343268-API-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D0%BE%D1%82%D0%B5%D0%BB%D0%B5%D0%B9?flash_digest=5ad0199ef52f645bb3dbed2ad94d5809250e16cd
+  onSubmit = () => {
+    const { city, startDate, endDate } = this.state;
+    let hotelsList;
+    let hotelsIds;
+    let hotels = [];
+
+     async function fetchHotels() {
+       hotelsList = await (await fetch(
+        `http://engine.hotellook.com/api/v2/cache.json?location=${city}&currency=rub&checkIn=${startDate}&checkOut=${endDate}&limit=10`
+      )).json();
+       hotelsIds = hotelsList.map(item => item.hotelId).join();
+      let photos = await (await fetch(` https://yasen.hotellook.com/photos/hotel_photos?id=${hotelsIds}`)).json();
+      let allPhotos = await fetch(`https://photo.hotellook.com/image_v2/limit/photo_id/800/520.auto`)
+     
+    }
+    fetchHotels()
+    // fetch(
+    //   `http://engine.hotellook.com/api/v2/cache.json?location=${city}&currency=rub&checkIn=${startDate}&checkOut=${endDate}&limit=10`
+    // ).then(response => response.json())
+    // .then(data => data.map(item => {
+    //  return hotelsIds.push(item.hotelId)
+    // }))
+    // .then(hotelsIds.join())
+    // .then( fetch)
+    
   }
 
   render() {
@@ -51,7 +75,7 @@ class App extends React.Component {
                     />
                   </div>
                   <div className="col">
-                  <label htmlFor="endDate">Дата выезда</label>
+                    <label htmlFor="endDate">Дата выезда</label>
                     <input
                       className="form-control"
                       type="date"
@@ -63,7 +87,7 @@ class App extends React.Component {
                   </div>
                 </div>
               </div>
-              <button type="button" className="btn btn-primary">
+              <button type="button" className="btn btn-primary" onClick={this.onSubmit}>
                 Искать
               </button>
             </div>
