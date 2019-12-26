@@ -24,12 +24,23 @@ class App extends React.Component {
     let hotels = [];
 
      async function fetchHotels() {
+       try {
        hotelsList = await (await fetch(
         `http://engine.hotellook.com/api/v2/cache.json?location=${city}&currency=rub&checkIn=${startDate}&checkOut=${endDate}&limit=10`
       )).json();
        hotelsIds = hotelsList.map(item => item.hotelId).join();
       let photos = await (await fetch(` https://yasen.hotellook.com/photos/hotel_photos?id=${hotelsIds}`)).json();
-      let allPhotos = await fetch(`https://photo.hotellook.com/image_v2/limit/photo_id/800/520.auto`)
+      console.log(photos)
+      for(let [hotel, photo] of Object.entries(photos)){
+         let picture = await fetch(`https://photo.hotellook.com/image_v2/limit/${photo[0]}/800/520.auto`, { mode: 'no-cors'});
+        console.log([hotel, picture])
+
+      }
+    } catch(err) {
+      console.log(err)
+    }
+      
+      // let allPhotos = await fetch(`https://photo.hotellook.com/image_v2/limit/photo_id/800/520.auto`)
      
     }
     fetchHotels()
