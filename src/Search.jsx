@@ -1,14 +1,20 @@
-import React from "react";
+import React from 'react'
 
 export default class Search extends React.Component {
+  render() {
+    const { onChange, onSubmit } = this.props
 
-    render() {
-        const { onChange, onSubmit } = this.props;
-        const date = new Date();
-        const minStartDate = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
-        const minEndDate = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()+1}`;
-        return (
-            <div className="container vw-100 vh-100 d-flex">
+    const formatDate = date => { //Добавляем 0 в начале номера месяца или числа, чтобы задать границы инпута дат
+      return +date < 10 ? `0${date}` : date
+    }
+    const date = new Date()
+    const month = date.getMonth()
+    const day = date.getDate()
+    const minStartDate = `${date.getFullYear()}-${formatDate(month + 1)}-${formatDate(day)}`;
+    const minEndDate = `${date.getFullYear()}-${formatDate(month + 1)}-${formatDate(day + 1)}`;
+
+    return (
+      <div className="container vw-100 vh-100 d-flex">
         <form className="m-auto">
           <div className="form-row">
             <h1 className="col-12 text-center">Поиск отелей</h1>
@@ -62,6 +68,6 @@ export default class Search extends React.Component {
           </div>
         </form>
       </div>
-        )
-    }
+    )
+  }
 }

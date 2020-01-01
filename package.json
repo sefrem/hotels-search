@@ -35,9 +35,13 @@
     "prettier": "1.19.1"
   },
   "prettier": {
-    "trailingComma": "es5",
+    "useTabs": false,
+    "printWidth": 80,
     "tabWidth": 2,
-    "semi": false,
-    "singleQuote": true
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "jsxBracketSameLine": false,
+    "parser": "flow",
+    "semi": false
   }
 }
