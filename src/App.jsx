@@ -4,9 +4,9 @@ import Results from "./Results";
 
 class App extends React.Component {
   state = {
-    city: 'Moscow',
-    startDate: '2020-01-10',
-    endDate: '2020-01-15',
+    city: '',
+    startDate: '',
+    endDate: '',
     token: '6d5dccc795985c3f6b9bbe9c70c428dd',
     hotels: []
   }
@@ -26,25 +26,25 @@ class App extends React.Component {
       let hotelsMap = new Map();
       let hotelsIds = []
       try {
-        let hotelsList = await (
+        let hotelsList = await (  //Получаем объект - список отелей
           await fetch(
             `http://engine.hotellook.com/api/v2/cache.json?location=${city}&currency=rub&checkIn=${startDate}&checkOut=${endDate}&limit=10`
           )
         ).json()
-        hotelsList.map(item => hotelsMap.set(item.hotelId, item))
+        hotelsList.map(item => hotelsMap.set(item.hotelId, item)) //Делаем объект Map, где ключи - id отелей, значения - объект с данными отелей
 
         for (let [key] of hotelsMap) {
           hotelsIds.push(key)
         }
 
         let hotelsString = hotelsIds.join()
-        let photos = await (
+        let photos = await (  //Получаем объект с фото всех отелей в формате - ключ - id отеля, значение - массив фото отеля
           await fetch(
             ` https://yasen.hotellook.com/photos/hotel_photos?id=${hotelsString}`
           )
         ).json()
 
-        for (let [hotel, photo] of Object.entries(photos)) {
+        for (let [hotel, photo] of Object.entries(photos)) { //Берем первое фото из каждого массива и добавляем новый ключ 'photo' со значением - "url фото отеля" в наш объект Map.
           let url = `https://photo.hotellook.com/image_v2/limit/${photo[0]}/800/520.auto`
           Object.defineProperty(hotelsMap.get(parseInt(hotel)), 'photo', {
             value: url,
@@ -52,7 +52,7 @@ class App extends React.Component {
             enumerable: true
           })
         }
-        this.setState({
+        this.setState({ 
           hotels: [...hotelsMap.values()],
         })
       } catch (err) {
@@ -67,7 +67,7 @@ class App extends React.Component {
     return (
       <div className="container">
       <Search 
-        onChange={this.Onchange}
+        onChange={this.onChange}
         onSubmit={this.onSubmit}
       />
       <Results 

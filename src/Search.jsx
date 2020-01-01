@@ -4,6 +4,9 @@ export default class Search extends React.Component {
 
     render() {
         const { onChange, onSubmit } = this.props;
+        const date = new Date();
+        const minStartDate = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+        const minEndDate = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()+1}`;
         return (
             <div className="container vw-100 vh-100 d-flex">
         <form className="m-auto">
@@ -31,6 +34,7 @@ export default class Search extends React.Component {
                       placeholder="Start Date"
                       id="startDate"
                       onChange={onChange}
+                      min={minStartDate}
                     />
                   </div>
                   <div className="col">
@@ -42,6 +46,7 @@ export default class Search extends React.Component {
                       placeholder="End Date"
                       id="endDate"
                       onChange={onChange}
+                      min={minEndDate}
                     />
                   </div>
                 </div>
