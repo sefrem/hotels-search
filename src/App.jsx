@@ -1,27 +1,46 @@
 import React from 'react'
 import Search from './Search'
 import Results from './Results'
+import { BrowserRouter, Route } from 'react-router-dom'
 
 class App extends React.Component {
   state = {
     city: '',
     startDate: '',
     endDate: '',
-    weatherApiKey: '38a4a07d50bf72d042d142b9d664d439',
+    weatherApiKey: 'RXPJPCJF9LJIDURNR9AVME6W5',
     hotels: [],
     weather: '',
+    isLoading: false,
+    errors: {
+      city: '',
+      startDate: '',
+      endDate: '',
+    },
   }
 
   onChange = e => {
     const name = e.target.name
     const value = e.target.value
-    this.setState({
+    this.setState(prevState => ({
       [name]: value,
-    })
+      errors: {
+        ...prevState.errors,
+        [name]: '',
+      },
+    }))
   }
 
-  onSubmit = () => {
-    this.fetchHotels()
+  onSubmit = e => {
+    const errors = this.validation()
+    if (Object.keys(errors).length) {
+      e.preventDefault()
+      this.setState({
+        errors: errors,
+      })
+    } else {
+      this.fetchHotels()
+    }
   }
 
   fetchHotels = async () => {
@@ -29,6 +48,10 @@ class App extends React.Component {
     let hotelsMap = new Map()
     let hotelsIds = []
     try {
+      this.setState({
+        isLoading: true,
+      })
+
       let hotelsList = await //Получаем объект - список отелей
       (
         await fetch(
@@ -60,45 +83,94 @@ class App extends React.Component {
       }
       this.setState({
         hotels: [...hotelsMap.values()],
+        isLoading: false,
       })
       this.getWeather()
     } catch (err) {
-      console.log(err)
+      console.log(err.message)
     }
   }
 
   getWeather = async () => {
     try {
       const { lat, lon } = this.state.hotels[0].location.geo
-      const { weatherApiKey, startDate } = this.state
-      const weatherDate = `${[startDate.split('-')[0] - 1] +
-        startDate.slice(4)}` //Делаем дату год назад для запроса погоды
+      const { weatherApiKey, startDate, endDate } = this.state
 
       let weather = await (
         await fetch(
-          `https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/${weatherApiKey}/${lat},${lon},${weatherDate}T12:00:00?units=auto`
+          `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/weatherdata/historysummary?goal=historysummary&aggregateHours=24&startDateTime=${startDate}&endDateTime=${endDate}&collectStationContributions=false&maxStations=-1&maxDistance=-1&minYear=2010&maxYear=2019&chronoUnit=months&breakBy=self&dailySummaries=true&shortColumnNames=false&sendAsDatasource=false&allowAsynch=false&contentType=json&unitGroup=uk&key=${weatherApiKey}&locations=${lat},${lon}`
         )
       ).json()
       this.setState({
-        weather: weather.currently.temperature.toFixed(1),
+        weather:
+          weather.locations[Object.keys(weather.locations)[0]].values[0].temp,
       })
     } catch (err) {
-      console.log(err)
+      console.log(err.message)
     }
   }
 
+  validation = () => {
+    const errors = {}
+    const { city, startDate, endDate } = this.state
+
+    if (city.length === 0) {
+      errors.city = 'Введите город'
+    }
+    if (startDate.length === 0) {
+      errors.startDate = 'Выберите дату заезда'
+    }
+    if (endDate.length === 0) {
+      errors.endDate = 'Выберите дату выезда'
+    } else if (new Date(startDate) >= new Date(endDate)) {
+      errors.endDate = 'Выезд должен быть позже въезда'
+    }
+
+    return errors
+  }
+
   render() {
-    const { startDate, endDate, hotels, weather } = this.state
+    const {
+      startDate,
+      endDate,
+      hotels,
+      weather,
+      city,
+      errors,
+      isLoading,
+    } = this.state
     return (
-      <div className="container">
-        <Search onChange={this.onChange} onSubmit={this.onSubmit} />
-        <Results
-          startDate={startDate}
-          endDate={endDate}
-          hotels={hotels}
-          weather={weather}
+      <BrowserRouter>
+        <Route
+          exact
+          path="/"
+          render={props => (
+            <Search
+              {...props}
+              onChange={this.onChange}
+              onSubmit={this.onSubmit}
+              startDate={startDate}
+              errorCity={errors.city}
+              errorStartDate={errors.startDate}
+              errorEndDate={errors.endDate}
+            />
+          )}
         />
-      </div>
+        <Route
+          path="/results"
+          render={props => (
+            <Results
+              {...props}
+              city={city}
+              startDate={startDate}
+              endDate={endDate}
+              hotels={hotels}
+              weather={weather}
+              isLoading={isLoading}
+            />
+          )}
+        />
+      </BrowserRouter>
     )
   }
 }
